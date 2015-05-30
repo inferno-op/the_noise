@@ -3,6 +3,7 @@
 // concrete noise based on https://www.shadertoy.com/view/4lfGRs by S.Guillitte
 // Simplex3D noise based on https://www.shadertoy.com/view/XtBGDG by Lallis
 // FBM noise by iq
+// Fractal Noise based on https://www.shadertoy.com/view/Msf3Wr by mu6k
 
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
@@ -26,6 +27,10 @@ float time = adsk_time *.05 * speed + offset;
 
 // concrete uniforms
 
+// fractal noise uniforms
+uniform float f_detail;
+
+	
 // start concrete noise
 float hash ( in vec2 p ) 
 {
@@ -169,6 +174,26 @@ float fbm(vec3 p)
 // end FBM
 
 
+float hash(float x)
+{
+	return fract(sin(cos(x*12.13)*19.123)*17.321);
+}
+
+// start Fractal Noise
+float fn_noise(vec2 p)
+{
+	vec2 pm = mod(p,1.0);
+	vec2 pd = p-pm;
+	float v0=hash(pd.x+pd.y*41.0);
+	float v1=hash(pd.x+1.0+pd.y*41.0);
+	float v2=hash(pd.x+pd.y*41.0+41.0);
+	float v3=hash(pd.x+pd.y*41.0+42.0);
+	v0 = mix(v0,v1,smoothstep(0.0,1.0,pm.x));
+	v2 = mix(v2,v3,smoothstep(0.0,1.0,pm.x));
+	return mix(v0,v2,smoothstep(0.0,1.0,pm.y));
+}
+// end Fractal Noise
+
 void main()
 {
 	vec2 uv = (gl_FragCoord.xy / resolution.xy) - pos;
@@ -183,7 +208,7 @@ void main()
 	uv *= scale;
 	//
 	
-	if ( noise_type == 1)
+	if ( noise_type == 1 )
 	{
 		// concrete noise
 	    vec2 p = fbm(uv)+2.;
@@ -192,18 +217,35 @@ void main()
 	}
 
 
-	else if ( noise_type == 2)
+	else if ( noise_type == 2 )
 	{
 		// FBM noise
    		float n = fbm(vec3(time * 0.2,vec2(uv)))*0.5+0.5;
 		col.rgb = vec3(n);
 	}
 
-	else if ( noise_type == 3)
+	else if ( noise_type == 3 )
 	{
 		// Simplex3D noise
 		float n = simplex3D(vec3(time,vec2(uv)))*0.5+0.5;
 		col.rgb = vec3(n);
+	}
+	
+	else if ( noise_type == 4 )
+	{
+		float v =0.0;
+		vec2 tuv = uv / 10.;
+		uv.x = tuv.x-tuv.y;
+		uv.y = tuv.x+tuv.y;
+		for (float i = 0.0; i<12.0; i+=1.0)
+		{
+			float t = mod(time+i,12.0);
+			float l = time-t;
+			float e = pow(1.4 * f_detail, t);
+			v+=fn_noise(uv*e+vec2(cos(l)*53.0,sin(l)*100.0))*(1.0-(t/12.0))*(t/12.0);
+		}
+		v-=0.5;
+		col = vec4(v);
 	}
 
 	
