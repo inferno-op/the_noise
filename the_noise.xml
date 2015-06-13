@@ -1,8 +1,8 @@
-<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="False" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="False" CommercialUsePermitted="True" ShaderType="Matchbox" SoftwareVersion="2015.0.0" LimitInputsToTexture="True" Version="1.0" Description="" Name="CROK Noise">
+<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="True" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="False" CommercialUsePermitted="False" ShaderType="Matchbox" SoftwareVersion="2015.0.0" LimitInputsToTexture="True" Version="1.0" Description="" Name="The Noise">
     <Shader OutputBitDepth="Output" Index="1">
 
 	  	<!-- Noise Type PopUp -->
-		<Uniform Max="1000000" Min="0" Default="0" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
+		<Uniform Max="1000000" Min="0" Default="10" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
 	           <PopupEntry Title="Concrete" Value="1">
 	           </PopupEntry>
 	           <PopupEntry Title="FBM" Value="2">
@@ -10,6 +10,26 @@
 	           <PopupEntry Title="Simplex3D" Value="3">
 	           </PopupEntry>
 	           <PopupEntry Title="Fractal" Value="4">
+	           </PopupEntry>
+	           <PopupEntry Title="Value" Value="5">
+	           </PopupEntry>
+	           <PopupEntry Title="Gradient v1" Value="6">
+	           </PopupEntry>
+	           <PopupEntry Title="Gradient v2" Value="7">
+	           </PopupEntry>
+	           <PopupEntry Title="Worley" Value="8">
+	           </PopupEntry>
+	           <PopupEntry Title="Ridged" Value="9">
+	           </PopupEntry>
+	           <PopupEntry Title="Perlin" Value="10">
+	           </PopupEntry>
+	           <PopupEntry Title="Plasma" Value="11">
+	           </PopupEntry>
+	           <PopupEntry Title="Marble" Value="12">
+	           </PopupEntry>
+	           <PopupEntry Title="Wood" Value="13">
+	           </PopupEntry>
+	           <PopupEntry Title="Clouds" Value="14">
 	           </PopupEntry>
 	    </Uniform>
 
@@ -37,10 +57,88 @@
 
 
 	   <!-- Fractal Noise Uniforms -->
-       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="1" Col="0" Page="0" Type="float" DisplayName="Detail" Name="f_detail"
+       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="f_detail"
    		UIConditionSource="noise_type" UIConditionValue="4" UIConditionInvert="False" UIConditionType="Hide">
        </Uniform>
+     	
+		<!-- Value Noise Uniforms -->
+		<!-- Noise Type PopUp -->
+   	<Uniform Max="1000000" Min="0" Default="1" Inc="1" Tooltip="" Row="1" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="v_noise_type" ValueType="Popup"    		UIConditionSource="noise_type" UIConditionValue="5" UIConditionInvert="False" UIConditionType="Hide">
+              <PopupEntry Title="Blocky" Value="0">
+              </PopupEntry>
+              <PopupEntry Title="Fractal" Value="1">
+              </PopupEntry>
+       </Uniform>
+	   <!-- Gradient Noise v1 Uniforms -->
+       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="g1_detail"
+   		UIConditionSource="noise_type" UIConditionValue="6" UIConditionInvert="False" UIConditionType="Hide">
+       </Uniform>
+	   
+	   <!-- Gradient Noise v2 Uniforms -->
+       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="g2_detail"
+   		UIConditionSource="noise_type" UIConditionValue="7" UIConditionInvert="False" UIConditionType="Hide">
+       </Uniform>
 
+	   <!-- Worley Noise Uniforms -->
+       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="w_edge_detail"
+   		UIConditionSource="noise_type" UIConditionValue="8" UIConditionInvert="False" UIConditionType="Hide">
+       </Uniform>	   
+
+	   <!-- Ridged Noise Uniforms -->
+  	<!-- Noise Type PopUp -->
+	<Uniform Max="1000000" Min="0" Default="0" Inc="1" Tooltip="" Row="1" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="r_noise_type" ValueType="Popup"    		UIConditionSource="noise_type" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
+           <PopupEntry Title="FBM" Value="0">
+           </PopupEntry>
+           <PopupEntry Title="Sinus+FBM" Value="1">
+           </PopupEntry>
+           <PopupEntry Title="Triangle Wave" Value="2">
+           </PopupEntry>
+           <PopupEntry Title="HighFreqSin" Value="3">
+           </PopupEntry>
+    </Uniform>
+    <Uniform ResDependent="None" Max="1000000.0" Min="0.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="r_detail"
+		UIConditionSource="noise_type" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
+    </Uniform>
+	
+   <!-- Perlin Noise Uniforms -->
+    <Uniform ResDependent="None" Max="6" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="p1_itt"
+		UIConditionSource="noise_type" UIConditionValue="10" UIConditionInvert="False" UIConditionType="Hide">
+    </Uniform>
+    <Uniform ResDependent="None" Max="100.0" Min="-100.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Structure" Name="perlinv1_v"
+		UIConditionSource="noise_type" UIConditionValue="10" UIConditionInvert="False" UIConditionType="Hide">
+    </Uniform>
+	
+   <!-- Plasma Noise Uniforms -->
+ <Uniform ResDependent="None" Max="100." Min="0.001" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Turbulence" Name="plasma_detail"
+	UIConditionSource="noise_type" UIConditionValue="11" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ <Uniform ResDependent="None" Max="12" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="plasma_iter"
+UIConditionSource="noise_type" UIConditionValue="11" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ 
+   <!-- Marble Noise Uniforms -->
+ <Uniform ResDependent="None" Max="100." Min="0.001" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Turbulence" Name="marble_detail"
+	UIConditionSource="noise_type" UIConditionValue="12" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ <Uniform ResDependent="None" Max="12" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="marble_iter"
+UIConditionSource="noise_type" UIConditionValue="12" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ 
+   <!-- Wood Noise Uniforms -->
+ <Uniform ResDependent="None" Max="100." Min="0.001" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Turbulence" Name="wood_detail"
+	UIConditionSource="noise_type" UIConditionValue="13" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ <Uniform ResDependent="None" Max="12" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="wood_iter"
+UIConditionSource="noise_type" UIConditionValue="13" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ 
+   <!-- Cloud Noise Uniforms -->
+ <Uniform ResDependent="None" Max="100." Min="0.001" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Turbulence" Name="cloud_detail"
+	UIConditionSource="noise_type" UIConditionValue="14" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ <Uniform ResDependent="None" Max="12" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="cloud_iter"
+UIConditionSource="noise_type" UIConditionValue="14" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
 
 	</Shader>
     <Page Name="General" Page="0">

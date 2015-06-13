@@ -4,10 +4,18 @@
 // Simplex3D noise based on https://www.shadertoy.com/view/XtBGDG by Lallis
 // FBM noise by iq
 // Fractal Noise based on https://www.shadertoy.com/view/Msf3Wr by mu6k
+// Value Noise based on https://www.shadertoy.com/view/lsf3WH by iq
+// Gradient Noise based on https://www.shadertoy.com/view/XdXGW8 by iq
+// Worley Noise  based on http://glslsandbox.com/e#25658.1
+// Ridged Noise based on https://www.shadertoy.com/view/ldj3Dw by nimitz
+// Perlin v1 Noise based on https://www.shadertoy.com/view/MllGzs by guil
+// Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
 #define PI 3.14159265359
+#define tau 6.2831853
+#define r_iter 6.
 
 uniform float adsk_result_w, adsk_result_h, adsk_time, adsk_result_frameratio;
 vec2 resolution = vec2(adsk_result_w, adsk_result_h);
@@ -30,7 +38,42 @@ float time = adsk_time *.05 * speed + offset;
 // fractal noise uniforms
 uniform float f_detail;
 
-	
+// value noise uniforms
+uniform int v_noise_type;
+
+// gradient noise v1 uniforms
+uniform float g1_detail;
+
+// gradient noise v2 uniforms
+uniform float g2_detail;
+
+// worley uniform
+uniform float w_edge_detail;
+
+// ridged noise uniforms
+uniform int r_noise_type;
+uniform float r_detail;
+
+// perlin v1 uniforms
+uniform int p1_itt;
+uniform float perlinv1_v;
+
+// Plasma uniforms
+uniform int plasma_iter;
+uniform float plasma_detail;
+
+// Marble uniforms
+uniform int marble_iter;
+uniform float marble_detail;
+
+// Wood uniforms
+uniform int wood_iter;
+uniform float wood_detail;
+
+// Clouds uniforms
+uniform int cloud_iter;
+uniform float cloud_detail;
+
 // start concrete noise
 float hash ( in vec2 p ) 
 {
@@ -42,6 +85,11 @@ vec2 hash2 ( vec2 p )
 	return vec2(hash(p*.754),hash(1.5743*p.yx+4.5891))-.5;
 }
 
+vec2 hash3(vec2 p)
+{
+	return perlinv1_v * vec2(hash(p*.754),hash(1.5743*p.yx+4.5891))-1.;
+}
+
 vec2 noise(vec2 x)
 {
 	vec2 add = vec2(1.0, .0);
@@ -49,6 +97,37 @@ vec2 noise(vec2 x)
     vec2 f = fract(x);
     f = f*f*(3.0-2.0*f);
     return mix(mix( hash2(p), hash2(p + add.xy),f.x), mix( hash2(p + add.yx), hash2(p + add.xx),f.x),f.y);
+}
+
+float gnoise( in vec2 p )
+{
+    vec2 i = floor( p );
+    vec2 f = fract( p );
+	
+	vec2 u = f*f*(3.0-2.0*f);
+
+    return mix( mix( dot( hash3( i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ), 
+                     dot( hash3( i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
+                mix( dot( hash3( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
+                     dot( hash3( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
+}
+
+float noise5( vec2 p)
+{
+    return gnoise(p*.5);
+}
+
+float fbm5( vec2 p ) {
+	
+	float f=5.0, a=1.0;
+   
+	float r = 0.0;	
+    for(int i = 0;i<p1_itt;i++)
+	{	
+		r += a	* abs(noise5( p*f ) );       
+		a *= .5; f *= 2.0;
+	}
+	return r/2.;
 }
 
 vec2 fbm(vec2 x)
@@ -63,7 +142,6 @@ vec2 fbm(vec2 x)
     return (r-x)*sqrt(a);
 }
 // end concrete noise
-
 
 // start Simplex3D 
 float noise3D(vec3 p)
@@ -159,7 +237,6 @@ float simplex3D(vec3 p)
 }
 // end Simplex3D
 
-
 // stat FBM
 float fbm(vec3 p)
 {
@@ -172,7 +249,6 @@ float fbm(vec3 p)
 	return f;
 }
 // end FBM
-
 
 float hash(float x)
 {
@@ -194,20 +270,244 @@ float fn_noise(vec2 p)
 }
 // end Fractal Noise
 
+// start Value Noise
+float v_hash( vec2 p )
+{
+	float h = dot(p,vec2(127.1,311.7));
+	
+    return -1.0 + 2.0*fract(sin(h)*43758.5453123);
+}
+
+float v_noise( in vec2 p )
+{
+    vec2 i = floor( p );
+    vec2 f = fract( p );
+	vec2 u = f*f*(3.0-2.0*f);
+    return mix( mix( v_hash( i + vec2(0.0,0.0) ), 
+                     v_hash( i + vec2(1.0,0.0) ), u.x),
+                mix( v_hash( i + vec2(0.0,1.0) ), 
+                     v_hash( i + vec2(1.0,1.0) ), u.x), u.y);
+}
+// end Value Noise
+
+// start Gradient Noise
+vec2 g_hash( vec2 p )
+{
+	p = vec2( dot(p,vec2(127.1,311.7)),
+			  dot(p,vec2(269.5,183.3)) );
+	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+}
+
+float g_noise( in vec2 p )
+{
+    vec2 i = floor( p );
+    vec2 f = fract( p );
+	vec2 u = f*f*(3.0-2.0*f);
+    return mix( mix( dot( g_hash( i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ), 
+                     dot( g_hash( i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
+                mix( dot( g_hash( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
+                     dot( g_hash( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
+}
+
+// start Worley Noise
+float w_length2(vec2 p)
+{
+	return dot(p, p);
+}
+
+float w_noise(vec2 p){
+	return fract(sin(fract(sin(p.x) * (43.13311)) + p.y) * 31.0011);
+}
+
+float w_worley(vec2 p) {
+	float d = 1e30;
+	for (int xo = -1; xo <= 1; ++xo) {
+		for (int yo = -1; yo <= 1; ++yo) {
+			vec2 tp = floor(p) + vec2(xo, yo);
+			d = min(d, w_length2(p - tp - vec2(w_noise(tp))));
+		}
+	}
+	return exp(-5.0*abs(1.0 * w_edge_detail * d - 1.0));
+}
+
+float w_fworley(vec2 p) {
+	return sqrt(sqrt(sqrt(w_worley(p) * sqrt(w_worley(p * scale)) *	sqrt(sqrt(w_worley(p))))));
+}
+// end Worley noise
+
+// start Ridged Noise
+mat2 makem2(float theta)
+{
+	float c = cos(theta);
+	float s = sin(theta);
+	return mat2(c,-s,s,c);
+}
+
+// start Perlin v2 Noise
+float p2_rand(vec2 uv)
+{
+    float dt = dot(uv, vec2(12.9898, 78.233));
+	return fract(sin(mod(dt, PI / 2.0)) * 43758.5453);
+}
+
+float plasma_turbulence(vec2 uv, float octave, int id)
+{
+    float col = 0.0;
+    vec2 xy;
+    vec2 frac;
+    vec2 tmp1;
+    vec2 tmp2;
+    float i2;
+    float amp;
+    float maxOct = octave;
+    for (int i = 0; i < plasma_iter; i++)
+    {
+        amp = maxOct / octave;
+        i2 = float(i);
+        xy = id == 1 || id == 4? (uv + 50.0 * float(id) * time / (1.0 + i2)) / octave : uv / octave;
+        frac = fract(xy);
+        tmp1 = mod(floor(xy) + resolution.xy, resolution.xy);
+        tmp2 = mod(tmp1 + resolution.xy - 1.0, resolution.xy);
+        col += frac.x * frac.y * p2_rand(tmp1) / amp;
+        col += frac.x * (1.0 - frac.y) * p2_rand(vec2(tmp1.x, tmp2.y)) / amp;
+        col += (1.0 - frac.x) * frac.y * p2_rand(vec2(tmp2.x, tmp1.y)) / amp;
+        col += (1.0 - frac.x) * (1.0 - frac.y) * p2_rand(tmp2) / amp;
+        octave /= 2.0;
+    }
+    return (col);
+}
+
+float marble_turbulence(vec2 uv, float octave, int id)
+{
+    float col = 0.0;
+    vec2 xy;
+    vec2 frac;
+    vec2 tmp1;
+    vec2 tmp2;
+    float i2;
+    float amp;
+    float maxOct = octave;
+    for (int i = 0; i < marble_iter; i++)
+    {
+        amp = maxOct / octave;
+        i2 = float(i);
+        xy = id == 1 || id == 4? (uv + 50.0 * float(id) * time / (1.0 + i2)) / octave : uv / octave;
+        frac = fract(xy);
+        tmp1 = mod(floor(xy) + resolution.xy, resolution.xy);
+        tmp2 = mod(tmp1 + resolution.xy - 1.0, resolution.xy);
+        col += frac.x * frac.y * p2_rand(tmp1) / amp;
+        col += frac.x * (1.0 - frac.y) * p2_rand(vec2(tmp1.x, tmp2.y)) / amp;
+        col += (1.0 - frac.x) * frac.y * p2_rand(vec2(tmp2.x, tmp1.y)) / amp;
+        col += (1.0 - frac.x) * (1.0 - frac.y) * p2_rand(tmp2) / amp;
+        octave /= 2.0;
+    }
+    return (col);
+}
+
+float cloud_turbulence(vec2 uv, float octave, int id)
+{
+    float col = 0.0;
+    vec2 xy;
+    vec2 frac;
+    vec2 tmp1;
+    vec2 tmp2;
+    float i2;
+    float amp;
+    float maxOct = octave;
+    for (int i = 0; i < cloud_iter; i++)
+    {
+        amp = maxOct / octave;
+        i2 = float(i);
+        xy = id == 1 || id == 4? (uv + 50.0 * float(id) * time / (1.0 + i2)) / octave : uv / octave;
+        frac = fract(xy);
+        tmp1 = mod(floor(xy) + resolution.xy, resolution.xy);
+        tmp2 = mod(tmp1 + resolution.xy - 1.0, resolution.xy);
+        col += frac.x * frac.y * p2_rand(tmp1) / amp;
+        col += frac.x * (1.0 - frac.y) * p2_rand(vec2(tmp1.x, tmp2.y)) / amp;
+        col += (1.0 - frac.x) * frac.y * p2_rand(vec2(tmp2.x, tmp1.y)) / amp;
+        col += (1.0 - frac.x) * (1.0 - frac.y) * p2_rand(tmp2) / amp;
+        octave /= 2.0;
+    }
+    return (col);
+}
+
+float wood_turbulence(vec2 uv, float octave, int id)
+{
+    float col = 0.0;
+    vec2 xy;
+    vec2 frac;
+    vec2 tmp1;
+    vec2 tmp2;
+    float i2;
+    float amp;
+    float maxOct = octave;
+    for (int i = 0; i < wood_iter; i++)
+    {
+        amp = maxOct / octave;
+        i2 = float(i);
+        xy = id == 1 || id == 4? (uv + 50.0 * float(id) * time / (1.0 + i2)) / octave : uv / octave;
+        frac = fract(xy);
+        tmp1 = mod(floor(xy) + resolution.xy, resolution.xy);
+        tmp2 = mod(tmp1 + resolution.xy - 1.0, resolution.xy);
+        col += frac.x * frac.y * p2_rand(tmp1) / amp;
+        col += frac.x * (1.0 - frac.y) * p2_rand(vec2(tmp1.x, tmp2.y)) / amp;
+        col += (1.0 - frac.x) * frac.y * p2_rand(vec2(tmp2.x, tmp1.y)) / amp;
+        col += (1.0 - frac.x) * (1.0 - frac.y) * p2_rand(tmp2) / amp;
+        octave /= 2.0;
+    }
+    return (col);
+}
+
+vec3 p2_clouds(vec2 uv)
+{
+    float col = cloud_turbulence(uv, 128.0 * cloud_detail, 1) * 0.75;
+    return (vec3(col - 0.1));
+}
+
+vec3 p2_marble(vec2 uv)
+{
+	vec2 period = vec2(3.0, 4.0);
+    vec2 turb = vec2(4.0, 64.0 * marble_detail);
+    float xy = uv.x * period.x / resolution.y + uv.y * period.y / resolution.x + turb.x * marble_turbulence(uv, turb.y, 2);
+    float col = abs(sin(xy * PI)) * 0.75;
+    return (vec3(col));
+}
+
+vec3 p2_wood(vec2 uv)
+{
+    vec2 iR = resolution.xy;
+    float period = 3.5 * wood_detail;
+    vec2 turb = vec2(0.04, 16.0);
+    vec2 xy;
+    xy.x = (uv.x - iR.x / 2.0) / iR.y;
+    xy.y = (uv.y - iR.y / 2.0) / iR.y;
+	xy.x += .88;
+	xy.y += 0.5;
+    float dist = length(xy) + turb.x * wood_turbulence(uv, turb.y, 3);
+    float col = 0.5 * abs(sin(2.0 * period * dist * PI));
+    return (vec3(col));
+}
+
+vec3 p2_plasma(vec2 uv)
+{
+	vec2 period = vec2(0.0, 0.0);
+    vec2 turb = vec2(1.0, 128.0 * plasma_detail);
+    float xy = uv.x * period.x / resolution.y + uv.y * period.y / resolution.x + turb.x * plasma_turbulence(uv, turb.y, 4);
+    float col = abs(sin(xy * PI)) * 0.75;
+    return (vec3(1. - col));
+}
+
 void main()
 {
 	vec2 uv = (gl_FragCoord.xy / resolution.xy) - pos;
     vec4 col = vec4(0.0);
-	
-	// rotate and remove the aspect
 	uv.x *= adsk_result_frameratio;
 	float rad_rot = (rot+180.0) * PI / 180.0; 
 	mat2 rotation = mat2( cos(-rad_rot), -sin(-rad_rot), sin(-rad_rot), cos(-rad_rot));
 	uv *= rotation;
 	uv.x *= aspect;
 	uv *= scale;
-	//
-	
+
 	if ( noise_type == 1 )
 	{
 		// concrete noise
@@ -215,7 +515,6 @@ void main()
 	    float c = length(p);
 	    col.rgb = vec3(p.y)*c/15.;
 	}
-
 
 	else if ( noise_type == 2 )
 	{
@@ -247,7 +546,140 @@ void main()
 		v-=0.5;
 		col = vec4(v);
 	}
-
+	
+	else if ( noise_type == 5 )
+	{
+		float f = 0.0;
+		
+		if ( v_noise_type == 0 )
+		{
+			f = v_noise( uv * 4.);
+		}
+		
+		else if ( v_noise_type == 1 )
+		{
+			uv *= 3.0;
+	        mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
+			f  = 0.5000*v_noise( uv ); uv = m*uv;
+			f += 0.2500*v_noise( uv ); uv = m*uv;
+			f += 0.1250*v_noise( uv ); uv = m*uv;
+			f += 0.0625*v_noise( uv ); uv = m*uv;
+			f = 0.5 + 0.5*f;
+		}
+		col.rgb = vec3(f);
+		
+	}
+	
+	else if ( noise_type == 6 )
+	{
+		float f = 0.0;
+		f = g_noise( uv * g1_detail );
+		f = 0.5 + 1.0*f;
+		col.rgb = vec3(f);
+	}
+	
+	else if ( noise_type == 7 )
+	{
+		float f = 0.0;
+		uv *= 2.0;
+        mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
+		f  = 0.5000*g_noise( uv * g2_detail ); uv = m*uv;
+		f += 0.2500*g_noise( uv * g2_detail ); uv = m*uv;
+		f += 0.1250*g_noise( uv * g2_detail ); uv = m*uv;
+		f += 0.0625*g_noise( uv * g2_detail ); uv = m*uv;
+		f = 0.5 + f;
+		col.rgb = vec3(f);
+	}
+	
+	else if ( noise_type == 8 )
+	{
+		float t = w_fworley(uv * resolution.xy / 1500.0);
+		col.rgb = vec3(t);
+	}
+	
+	else if ( noise_type == 9 )
+	{
+		uv *= scale;
+		vec2 rz;
+		mat2 m2 = makem2(tau/(6.+3.));
+		float z=2.;
+		
+		if ( r_noise_type == 0 )
+		{
+			//base fbm noise
+			for (float i= 1.;i < r_iter;i++ )
+			{
+				rz+= noise(uv)/z;
+				z = z*.7;
+				uv = uv*m2*r_detail;
+			}
+		}
+		
+		else if ( r_noise_type == 1 )
+		{
+			//sinus+fbm noise
+			for (float i= 1.;i < r_iter;i++ )
+			{
+				rz+= (sin(noise(uv)*7.)*0.5+0.5) /z;
+				z = z*2.;
+				uv = uv*m2*r_detail;
+			}	
+		}
+		else if ( r_noise_type == 2 )
+		{
+			//ridged/turbulent noise (triangle wave + fbm)
+			for (float i= 1.;i < r_iter;i++ )
+			{
+				rz+= abs((noise(uv)-0.5)*2.)/z;
+				z *= 7.;
+				uv = uv*r_detail*m2;
+			}
+		}
+		else if ( r_noise_type == 3 )
+		{
+			//high frenquency sinus
+			for (float i= 1.;i < r_iter;i++ )
+			{
+				rz+= (sin(noise(uv)*25.)*0.5+0.5) /z;
+				z = z*2.;
+				uv = uv*m2*r_detail;
+			}
+		}
+		col.rgb = vec3(rz.x);
+	}
+	
+	else if ( noise_type == 10 )
+	{
+		float r;
+	    r = fbm5(uv* 0.3);
+	    r = 4.5*r-1.;
+		col.rgb = clamp(vec3(r*r),0.,1.);
+	}
+	
+	else if ( noise_type == 11 )
+	{
+		uv *= 200.0;
+		col.rgb = vec3(p2_plasma(uv));
+	}
+	
+	else if ( noise_type == 12 )
+	{
+		uv *= 200.0;
+		col.rgb = vec3(p2_marble(uv / 2.0));
+	}
+	
+	else if ( noise_type == 13 )
+	{
+		uv *= 200.0;
+		col.rgb = vec3(p2_wood(uv));
+	}
+	
+	else if ( noise_type == 14 )
+	{
+		uv *= 200.0;
+		col.rgb = vec3(p2_clouds(uv));
+	}
+		
 	
 	gl_FragColor = col;
 }
