@@ -8,8 +8,10 @@
 // Gradient Noise based on https://www.shadertoy.com/view/XdXGW8 by iq
 // Worley Noise  based on http://glslsandbox.com/e#25658.1
 // Ridged Noise based on https://www.shadertoy.com/view/ldj3Dw by nimitz
-// Perlin v1 Noise based on https://www.shadertoy.com/view/MllGzs by guil
+// Perlin Noise based on https://www.shadertoy.com/view/MllGzs by guil
 // Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
+// Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
+
 
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
@@ -34,6 +36,8 @@ float time = adsk_time *.05 * speed + offset;
 
 
 // concrete uniforms
+uniform float c_detail;
+uniform int c_noise_itt;
 
 // fractal noise uniforms
 uniform float f_detail;
@@ -74,6 +78,11 @@ uniform float wood_detail;
 uniform int cloud_iter;
 uniform float cloud_detail;
 
+// Crawling uniforms
+uniform int crawling_iter;
+uniform float crawling_detail;
+uniform float crawling_displace;
+
 // start concrete noise
 float hash ( in vec2 p ) 
 {
@@ -85,11 +94,6 @@ vec2 hash2 ( vec2 p )
 	return vec2(hash(p*.754),hash(1.5743*p.yx+4.5891))-.5;
 }
 
-vec2 hash3(vec2 p)
-{
-	return perlinv1_v * vec2(hash(p*.754),hash(1.5743*p.yx+4.5891))-1.;
-}
-
 vec2 noise(vec2 x)
 {
 	vec2 add = vec2(1.0, .0);
@@ -99,49 +103,20 @@ vec2 noise(vec2 x)
     return mix(mix( hash2(p), hash2(p + add.xy),f.x), mix( hash2(p + add.yx), hash2(p + add.xx),f.x),f.y);
 }
 
-float gnoise( in vec2 p )
-{
-    vec2 i = floor( p );
-    vec2 f = fract( p );
-	
-	vec2 u = f*f*(3.0-2.0*f);
-
-    return mix( mix( dot( hash3( i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ), 
-                     dot( hash3( i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
-                mix( dot( hash3( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
-                     dot( hash3( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
-}
-
-float noise5( vec2 p)
-{
-    return gnoise(p*.5);
-}
-
-float fbm5( vec2 p ) {
-	
-	float f=5.0, a=1.0;
-   
-	float r = 0.0;	
-    for(int i = 0;i<p1_itt;i++)
-	{	
-		r += a	* abs(noise5( p*f ) );       
-		a *= .5; f *= 2.0;
-	}
-	return r/2.;
-}
-
 vec2 fbm(vec2 x)
 {
     vec2 r = x;
     float a = 1.;
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < c_noise_itt; i++)
     {
         r += noise(r*a)/a;
-        //a*=1.347;
+        a = c_detail;
     }     
     return (r-x)*sqrt(a);
 }
 // end concrete noise
+
+
 
 // start Simplex3D 
 float noise3D(vec3 p)
@@ -275,7 +250,7 @@ float v_hash( vec2 p )
 {
 	float h = dot(p,vec2(127.1,311.7));
 	
-    return -1.0 + 2.0*fract(sin(h)*43758.5453123);
+    return -1.0 + 2.0*fract(sin(h)*43758.5453123 + time);
 }
 
 float v_noise( in vec2 p )
@@ -289,6 +264,43 @@ float v_noise( in vec2 p )
                      v_hash( i + vec2(1.0,1.0) ), u.x), u.y);
 }
 // end Value Noise
+
+// start Perlin Noise
+float vnoise(vec2 x)//Value noise
+{
+    vec2 p = floor(x);
+    vec2 f = fract(x);
+    f = f*f*(3.0-2.0*f);
+    
+    return  2.*mix(mix( hash(p),hash(p + vec2(1.,0.)),f.x),
+                  mix( hash(p+vec2(0.,1.)), hash(p+1.),f.x),f.y)-1.;
+            
+}
+mat2 m2= mat2(.8,.6,-.6,.8);
+
+float dvnoise(vec2 p)//Value noise + value noise with rotation
+{
+    return .5*(vnoise(p - time)+vnoise(m2*p + time));    
+}
+
+float noise5( vec2 p)
+{
+    return dvnoise(p);
+}
+
+float fbm5( vec2 p ) {
+	
+	float f=5.0, a= perlinv1_v;
+   
+	float r = 0.0;	
+    for(int i = 0;i<p1_itt;i++)
+	{	
+		r += a	* abs(noise5( p*f ) );       
+		a *= .5; f *= 2.0;
+	}
+	return r/2.;
+}
+// end Perlin Noise
 
 // start Gradient Noise
 vec2 g_hash( vec2 p )
@@ -497,6 +509,70 @@ vec3 p2_plasma(vec2 uv)
     return (vec3(1. - col));
 }
 
+// start Crawling Noise
+vec2 crawling_hash( vec2 p )
+{
+	p = vec2( dot(p,vec2(127.1,110.7)),
+			  dot(p,vec2(269.5,45.34)) );
+	return 2.0*fract(sin(p)*4378.5453123);
+}
+
+float crawling_noise( in vec2 p )
+{
+    vec2 i = floor( p );
+    vec2 f = fract( p );
+	vec2 u = f*f*(3.0-2.0*f);
+    return mix( mix( dot( crawling_hash( i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ), 
+                     dot( crawling_hash( i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
+                mix( dot( crawling_hash( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
+                     dot( crawling_hash( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
+}
+
+vec2 crawling_gradn(vec2 p)
+{
+	float ep = 0.5 * crawling_detail;
+	float gradx = crawling_noise(vec2(p.x+ep,p.y))-crawling_noise(vec2(p.x-ep,p.y));
+	float grady = crawling_noise(vec2(p.x,p.y+ep))-crawling_noise(vec2(p.x,p.y-ep));
+	return vec2(gradx,grady);
+}
+
+float crawling_flow(in vec2 p)
+{
+	time *= 0.05;
+	float lava_z=2.;
+	float rz = 0.;
+	vec2 bp = p;
+	for (float i= 1.;i < crawling_iter + 1;i++ )
+	{
+		//secondary flow speed (speed of the perceived flow)
+		bp += time*1.9;
+		
+		//displacement field (try changing time multiplier)
+		vec2 gr = crawling_gradn(i*p*.34+time);
+		
+		//rotation of the displacement field
+		gr*=makem2(time*6.-(0.05*p.x+0.03*p.y)*40.);
+		
+		//displace the system
+		p += gr*.5 * crawling_displace;
+		
+		//add noise octave
+		rz+= (sin(crawling_noise(p)*7.)*0.5+0.5)/lava_z;
+		
+		//blend factor (blending displaced system with base system)
+		//you could call this advection factor (.5 being low, .95 being high)
+		p = mix(bp,p,.9);
+		
+		//intensity scaling
+		lava_z *= 1.4;
+		//octave scaling
+		p *= 2.;
+		bp *= 1.9;
+	}
+	return rz;	
+}
+// end Crawling Noise
+
 void main()
 {
 	vec2 uv = (gl_FragCoord.xy / resolution.xy) - pos;
@@ -554,6 +630,7 @@ void main()
 		if ( v_noise_type == 0 )
 		{
 			f = v_noise( uv * 4.);
+			f = 0.5 + 0.5*f;
 		}
 		
 		else if ( v_noise_type == 1 )
@@ -678,6 +755,14 @@ void main()
 	{
 		uv *= 200.0;
 		col.rgb = vec3(p2_clouds(uv));
+	}
+	
+	else if ( noise_type == 15 )
+	{
+		uv*= -.2;
+		uv.y += 17.0;
+		float rz = crawling_flow(uv);
+		col.rgb = vec3(rz*.68);
 	}
 		
 	

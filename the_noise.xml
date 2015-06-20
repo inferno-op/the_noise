@@ -2,7 +2,7 @@
     <Shader OutputBitDepth="Output" Index="1">
 
 	  	<!-- Noise Type PopUp -->
-		<Uniform Max="1000000" Min="0" Default="10" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
+		<Uniform Max="1000000" Min="0" Default="14" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
 	           <PopupEntry Title="Concrete" Value="1">
 	           </PopupEntry>
 	           <PopupEntry Title="FBM" Value="2">
@@ -31,11 +31,13 @@
 	           </PopupEntry>
 	           <PopupEntry Title="Clouds" Value="14">
 	           </PopupEntry>
+	           <PopupEntry Title="Crawling" Value="15">
+	           </PopupEntry>
 	    </Uniform>
 
 
 	  	<!-- Global Shader Uniforms -->
-        <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="10.0" Inc="0.01" Tooltip="" Row="0" Col="1" Page="0" Type="float" DisplayName="Detail" Name="scale">
+        <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="10.0" Inc="0.01" Tooltip="" Row="0" Col="1" Page="0" Type="float" DisplayName="Scale" Name="scale">
         </Uniform>
        <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01" Tooltip="" Row="1" Col="1" Page="0" Type="float" DisplayName="Aspect" Name="aspect">
        </Uniform>
@@ -56,6 +58,15 @@
        </Uniform>
 
 
+	   <!-- Concrete Noise Uniforms -->
+	 <Uniform ResDependent="None" Max="100." Min="0.01" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Turbulence" Name="c_detail"
+		UIConditionSource="noise_type" UIConditionValue="1" UIConditionInvert="False" UIConditionType="Hide">
+	 </Uniform>
+	 <Uniform ResDependent="None" Max="12" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="c_noise_itt"
+	UIConditionSource="noise_type" UIConditionValue="1" UIConditionInvert="False" UIConditionType="Hide">
+	 </Uniform>
+	 
+	 
 	   <!-- Fractal Noise Uniforms -->
        <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="f_detail"
    		UIConditionSource="noise_type" UIConditionValue="4" UIConditionInvert="False" UIConditionType="Hide">
@@ -104,7 +115,7 @@
     <Uniform ResDependent="None" Max="6" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="p1_itt"
 		UIConditionSource="noise_type" UIConditionValue="10" UIConditionInvert="False" UIConditionType="Hide">
     </Uniform>
-    <Uniform ResDependent="None" Max="100.0" Min="-100.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Structure" Name="perlinv1_v"
+    <Uniform ResDependent="None" Max="10.0" Min="0.01" Default="0.5" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Structure" Name="perlinv1_v"
 		UIConditionSource="noise_type" UIConditionValue="10" UIConditionInvert="False" UIConditionType="Hide">
     </Uniform>
 	
@@ -138,6 +149,17 @@ UIConditionSource="noise_type" UIConditionValue="13" UIConditionInvert="False" U
  </Uniform>
  <Uniform ResDependent="None" Max="12" Min="1" Default="6" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="cloud_iter"
 UIConditionSource="noise_type" UIConditionValue="14" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ 
+ <!-- Lava Noise Uniforms -->
+ <Uniform ResDependent="None" Max="100." Min="0.001" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Turbulence" Name="crawling_detail"
+	UIConditionSource="noise_type" UIConditionValue="15" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ <Uniform ResDependent="None" Max="16" Min="1" Default="3" Inc="1" Tooltip="" Row="2" Col="0" Page="0" Type="int" DisplayName="Detail" Name="crawling_iter"
+UIConditionSource="noise_type" UIConditionValue="15" UIConditionInvert="False" UIConditionType="Hide">
+ </Uniform>
+ <Uniform ResDependent="None" Max="10." Min="-10." Default="1.0" Inc="0.01" Tooltip="" Row="4" Col="0" Page="0" Type="float" DisplayName="Displace" Name="crawling_displace"
+	UIConditionSource="noise_type" UIConditionValue="15" UIConditionInvert="False" UIConditionType="Hide">
  </Uniform>
 
 	</Shader>
