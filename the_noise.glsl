@@ -12,7 +12,6 @@
 // Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 // Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
 
-
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
 #define PI 3.14159265359

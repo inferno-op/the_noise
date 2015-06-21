@@ -1,4 +1,19 @@
-<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="True" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="False" CommercialUsePermitted="False" ShaderType="Matchbox" SoftwareVersion="2015.0.0" LimitInputsToTexture="True" Version="1.0" Description="" Name="The Noise">
+<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="True" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="False" CommercialUsePermitted="False" ShaderType="Matchbox" SoftwareVersion="2015.0.0" LimitInputsToTexture="True" Version="1.0" Description="
+This shader creates diffferent noise patterns
+
+Concrete noise based on https://www.shadertoy.com/view/4lfGRs by S.Guillitte
+Simplex3D noise based on https://www.shadertoy.com/view/XtBGDG by Lallis
+FBM noise by iq
+Fractal Noise based on https://www.shadertoy.com/view/Msf3Wr by mu6k
+Value Noise based on https://www.shadertoy.com/view/lsf3WH by iq
+Gradient Noise based on https://www.shadertoy.com/view/XdXGW8 by iq
+Worley Noise  based on http://glslsandbox.com/e#25658.1
+Ridged Noise based on https://www.shadertoy.com/view/ldj3Dw by nimitz
+Perlin Noise based on https://www.shadertoy.com/view/MllGzs by guil
+Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
+Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
+
+License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License." Name="The Noise">
     <Shader OutputBitDepth="Output" Index="1">
 
 	  	<!-- Noise Type PopUp -->
