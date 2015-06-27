@@ -213,10 +213,10 @@ UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" U
 	   -->
 
 	   <!-- Water Noise Uniforms -->
- 	  <Uniform ResDependent="None" Max="100000." Min="-100000.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Detail" Name="water_detail"
+ 	  <Uniform ResDependent="None" Max="100000." Min="-100000.0" Default="1.0" Inc="0.01" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="water_detail"
  	 	UIConditionSource="noise_type" UIConditionValue="17" UIConditionInvert="False" UIConditionType="Hide">
  	  </Uniform>
-	  <Uniform ResDependent="None" Max="10." Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="4" Col="0" Page="0" Type="float" DisplayName="Noise" Name="w_noise"
+	  <Uniform ResDependent="None" Max="10." Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Noise" Name="w_noise"
 	 	UIConditionSource="noise_type" UIConditionValue="17" UIConditionInvert="False" UIConditionType="Hide">
 	  </Uniform>
 
