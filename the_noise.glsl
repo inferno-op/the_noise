@@ -6,11 +6,12 @@
 // Fractal Noise based on https://www.shadertoy.com/view/Msf3Wr by mu6k
 // Value Noise based on https://www.shadertoy.com/view/lsf3WH by iq
 // Gradient Noise based on https://www.shadertoy.com/view/XdXGW8 by iq
-// Worley Noise  based on http://glslsandbox.com/e#25658.1
+// Worley Noise  based on https://www.shadertoy.com/view/ldB3zc by iq
 // Ridged Noise based on https://www.shadertoy.com/view/ldj3Dw by nimitz
 // Perlin Noise based on https://www.shadertoy.com/view/MllGzs by guil
 // Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 // Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
+// Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
 
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
@@ -51,7 +52,8 @@ uniform float g1_detail;
 uniform float g2_detail;
 
 // worley uniform
-uniform float w_edge_detail;
+uniform float w_detail;
+uniform int w_color_type;
 
 // ridged noise uniforms
 uniform int r_noise_type;
@@ -81,6 +83,11 @@ uniform float cloud_detail;
 uniform int crawling_iter;
 uniform float crawling_detail;
 uniform float crawling_displace;
+
+// Cells on Fire uniforms
+uniform float cof_detail;
+uniform int cof_noise_type;
+
 
 // start concrete noise
 float hash ( in vec2 p ) 
@@ -321,28 +328,33 @@ float g_noise( in vec2 p )
 }
 
 // start Worley Noise
-float w_length2(vec2 p)
+vec4 worley( in vec2 x, float w )
 {
-	return dot(p, p);
-}
+    vec2 n = floor( x );
+    vec2 f = fract( x );
 
-float w_noise(vec2 p){
-	return fract(sin(fract(sin(p.x) * (43.13311)) + p.y) * 31.0011);
-}
+	vec4 m = vec4( 8.0, 0.0, 0.0, 0.0 );
+    for( int j=-2; j<=2; j++ )
+    for( int i=-2; i<=2; i++ )
+    {
+        vec2 g = vec2( float(i),float(j) );
+        vec2 o = g_hash( n + g );
+		
+		// animate
+        o = 0.5 + 0.5*sin( time + 6.2831*o );
 
-float w_worley(vec2 p) {
-	float d = 1e30;
-	for (int xo = -1; xo <= 1; ++xo) {
-		for (int yo = -1; yo <= 1; ++yo) {
-			vec2 tp = floor(p) + vec2(xo, yo);
-			d = min(d, w_length2(p - tp - vec2(w_noise(tp))));
-		}
-	}
-	return exp(-5.0*abs(1.0 * w_edge_detail * d - 1.0));
-}
-
-float w_fworley(vec2 p) {
-	return sqrt(sqrt(sqrt(w_worley(p) * sqrt(w_worley(p * scale)) *	sqrt(sqrt(w_worley(p))))));
+        // distance to cell		
+		float d = length(g - f + o);
+		
+        // do the smoth min for colors and distances		
+		vec3 col = 0.5 + 0.5*sin( hash(dot(n+g,vec2(50.)))*3. + 2. + vec3(3.));
+		float h = smoothstep( 0.0, 1.0, 0.5 + 0.5*(m.x-d)/w );
+		
+	    m.x   = mix( m.x,     d, h ) - h*(1.0-h)*w/(1.0+3.0*w); // distance
+		m.yzw = mix( m.yzw, col, h ) - h*(1.0-h)*w/(1.0+3.0*w); // color
+    }
+	
+	return m;
 }
 // end Worley noise
 
@@ -572,6 +584,86 @@ float crawling_flow(in vec2 p)
 }
 // end Crawling Noise
 
+// start cells on fire
+float cof_length(vec2 p) { return dot(p, p); }
+
+float cof_noise(vec2 p){
+	return fract(sin(fract(sin(p.x) * (4313.13311)) + p.y) * 3131.0011);
+}
+
+float cof_noise2(vec2 p) 
+{
+    return fract(sin(p.x*15.32+p.y*35.78) * 43758.23);
+}
+
+float cof_worley(vec2 p) 
+{
+	float d = 1e30;
+	for (int xo = -1; xo <= 1; ++xo)
+	for (int yo = -1; yo <= 1; ++yo) 
+	{
+		vec2 tp = floor(p) + vec2(xo, yo);
+		d = min(d, cof_length(p  - tp - vec2(cof_noise2(tp*time*0.00000000001))));
+	}
+	return 3.*exp(-4.*abs(4.*d - 1.));
+}
+
+float cof_worley2(vec2 p) 
+{
+	float d = 1e30;
+	for (int xo = -1; xo <= 1; ++xo)
+	for (int yo = -1; yo <= 1; ++yo) 
+	{
+		vec2 tp = floor(p) + vec2(xo, yo);
+		d = min(d, cof_length(p  - tp - vec2(cof_noise(tp))));
+	}
+	return 3.*exp(-4.*abs(4.*d - 1.));
+}
+
+float cof_worley3(vec2 p) 
+{
+	float d = 1e30;
+	for (int xo = -1; xo <= 1; ++xo)
+	for (int yo = -1; yo <= 1; ++yo) 
+	{
+		vec2 tp = floor(p) + vec2(xo, yo);
+		d = min(1., cof_length(p - tp - time * 0.000001 * cof_detail));
+	}
+	return 3.*exp(-3.*abs(4.*d - 1.));
+}
+
+float cof_fworley(vec2 p) {
+	return sqrt(sqrt(sqrt(
+		cof_worley(p*2. + 1.3 + time*.5) *
+		cof_worley(p*4. + 2.3 - time*.25) *
+		cof_worley(p*8. + 3.3 + time*.125) *
+		cof_worley(p*16. + 4.3 - time*.125) *
+		sqrt(cof_worley(p * 64. + 5.3 + time * .0625)) *
+		sqrt(sqrt(cof_worley(p * 128. - 7.3))))));
+}
+
+float cof_fworley2(vec2 p) {
+	return sqrt(sqrt(sqrt(
+		cof_worley2(p*2. + 1.3 - time*.5) *
+		cof_worley2(p*4. + 2.3 + time*.25) *
+		cof_worley2(p*8. + 3.3 - time*.125) *
+		cof_worley2(p*16. + 4.3 + time*.125) *
+		sqrt(cof_worley2(p * 64. - 5.3 + time * .0625)) *
+		sqrt(sqrt(cof_worley2(p * 128. + 7.3))))));
+}
+
+float cof_fworley3(vec2 p) {
+	return sqrt(sqrt(sqrt(
+        cof_worley3(p*2. + 1.1 + time*.5) *
+		cof_worley3(p*4. + 1.1 - time*.25) *
+		cof_worley3(p*8. + 1.1 + time*.125) *
+		cof_worley3(p*32. + 1.1 - time*.125) *
+		sqrt(cof_worley3(p * 64. + 1.1 + time * .0625)) *
+		sqrt(sqrt(cof_worley3(p * 128. + 1.1))))));
+}
+// end cells on fire
+
+
 void main()
 {
 	vec2 uv = (gl_FragCoord.xy / resolution.xy) - pos;
@@ -669,8 +761,18 @@ void main()
 	
 	else if ( noise_type == 8 )
 	{
-		float t = w_fworley(uv * resolution.xy / 1500.0);
-		col.rgb = vec3(t);
+	    uv *= scale * 0.1;
+	    vec4 c = worley( uv, w_detail);
+		col.rgb = c.yzw;
+		
+		if ( w_color_type == 0 )
+			col.rgb; 
+		else if ( w_color_type == 1 )		
+		   	col.rgb *= 1.0 - 0.8*c.x;
+	   	else if ( w_color_type == 2 )
+			col.rgb *= mix(c.x,1.0,0.0);
+	   	else if ( w_color_type == 3 )
+			col.rgb = c.xxx*0.8;
 	}
 	
 	else if ( noise_type == 9 )
@@ -763,7 +865,18 @@ void main()
 		float rz = crawling_flow(uv);
 		col.rgb = vec3(rz*.68);
 	}
-		
+
+	else if ( noise_type == 16 )
+	{
+		float t = 0.0;
+		if ( cof_noise_type == 0 )
+			t = cof_fworley2(uv * .1);
+		else if ( cof_noise_type == 1 )
+			t = cof_fworley(uv * .05);
+		else if ( cof_noise_type == 2 )
+			t = cof_fworley3(uv * .01);
+		col.rgb = vec3(t);
+	}
 	
 	gl_FragColor = col;
 }

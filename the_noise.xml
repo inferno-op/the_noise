@@ -1,4 +1,4 @@
-<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="True" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="False" CommercialUsePermitted="False" ShaderType="Matchbox" SoftwareVersion="2015.0.0" LimitInputsToTexture="True" Version="1.0" Description="
+<ShaderNodePreset SupportsAdaptiveDegradation="False" SupportsAction="True" SupportsTransition="False" SupportsTimeline="False" TimelineUseBack="False" MatteProvider="False" CommercialUsePermitted="False" ShaderType="Matchbox" SoftwareVersion="2015.0.0" LimitInputsToTexture="True" Version="1.2" Description="
 This shader creates diffferent noise patterns
 
 Concrete noise based on https://www.shadertoy.com/view/4lfGRs by S.Guillitte
@@ -7,11 +7,12 @@ FBM noise by iq
 Fractal Noise based on https://www.shadertoy.com/view/Msf3Wr by mu6k
 Value Noise based on https://www.shadertoy.com/view/lsf3WH by iq
 Gradient Noise based on https://www.shadertoy.com/view/XdXGW8 by iq
-Worley Noise  based on http://glslsandbox.com/e#25658.1
+Worley Noise  based on https://www.shadertoy.com/view/ldB3zc by iq
 Ridged Noise based on https://www.shadertoy.com/view/ldj3Dw by nimitz
 Perlin Noise based on https://www.shadertoy.com/view/MllGzs by guil
 Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
+Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
 
 License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License." Name="The Noise">
     <Shader OutputBitDepth="Output" Index="1">
@@ -47,6 +48,8 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
 	           <PopupEntry Title="Clouds" Value="14">
 	           </PopupEntry>
 	           <PopupEntry Title="Crawling" Value="15">
+	           </PopupEntry>
+	           <PopupEntry Title="Cells on Fire" Value="16">
 	           </PopupEntry>
 	    </Uniform>
 
@@ -106,9 +109,21 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
        </Uniform>
 
 	   <!-- Worley Noise Uniforms -->
-       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="w_edge_detail"
+    	<!-- Noise Type PopUp -->
+  	<Uniform Max="1000000" Min="0" Default="2" Inc="1" Tooltip="" Row="1" Col="0" Page="0" DisplayName="Type" Type="int" Name="w_color_type" ValueType="Popup"
+	UIConditionSource="noise_type" UIConditionValue="8" UIConditionInvert="False" UIConditionType="Hide">
+             <PopupEntry Title="Flat" Value="0">
+             </PopupEntry>
+             <PopupEntry Title="Balls" Value="1">
+             </PopupEntry>
+             <PopupEntry Title="Cells" Value="2">
+             </PopupEntry>
+             <PopupEntry Title="Grid" Value="3">
+             </PopupEntry>
+      </Uniform>	   
+       <Uniform ResDependent="None" Max="1.0" Min="0.0" Default="1.0" Inc="0.001" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Smoothness" Name="w_detail"
    		UIConditionSource="noise_type" UIConditionValue="8" UIConditionInvert="False" UIConditionType="Hide">
-       </Uniform>	   
+       </Uniform>
 
 	   <!-- Ridged Noise Uniforms -->
   	<!-- Noise Type PopUp -->
@@ -176,7 +191,22 @@ UIConditionSource="noise_type" UIConditionValue="15" UIConditionInvert="False" U
  <Uniform ResDependent="None" Max="10." Min="-10." Default="1.0" Inc="0.01" Tooltip="" Row="4" Col="0" Page="0" Type="float" DisplayName="Displace" Name="crawling_displace"
 	UIConditionSource="noise_type" UIConditionValue="15" UIConditionInvert="False" UIConditionType="Hide">
  </Uniform>
-
+ 
+   <!-- Cells on Fire Noise Uniforms -->
+	<!-- Noise Type PopUp -->
+<Uniform Max="1000000" Min="0" Default="0" Inc="1" Tooltip="" Row="1" Col="0" Page="0" DisplayName="Type" Type="int" Name="cof_noise_type" ValueType="Popup"
+UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" UIConditionType="Hide">
+         <PopupEntry Title="Brain" Value="0">
+         </PopupEntry>
+         <PopupEntry Title="Mosaic" Value="1">
+         </PopupEntry>
+         <PopupEntry Title="Misc" Value="2">
+         </PopupEntry>
+  </Uniform>	   
+  <Uniform ResDependent="None" Max="100000." Min="-100000.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Detail" Name="cof_detail"
+ 	UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" UIConditionType="Hide">
+  </Uniform>
+  
 	</Shader>
     <Page Name="General" Page="0">
        <Col Name="Look" Col="0" Page="0">
