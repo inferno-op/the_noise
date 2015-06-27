@@ -12,7 +12,8 @@
 // Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 // Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
 // Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
-
+// Water Noise based on https://www.shadertoy.com/view/llsGWl by guil
+ 
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
 #define PI 3.14159265359
@@ -88,6 +89,9 @@ uniform float crawling_displace;
 uniform float cof_detail;
 uniform int cof_noise_type;
 
+// Water uniforms
+uniform float water_detail;
+uniform float w_noise;
 
 // start concrete noise
 float hash ( in vec2 p ) 
@@ -121,8 +125,6 @@ vec2 fbm(vec2 x)
     return (r-x)*sqrt(a);
 }
 // end concrete noise
-
-
 
 // start Simplex3D 
 float noise3D(vec3 p)
@@ -663,6 +665,63 @@ float cof_fworley3(vec2 p) {
 }
 // end cells on fire
 
+// start water noise
+vec2 m = vec2(.1,1.);
+
+vec2 water_hash(vec2 p)
+{
+	return vec2(cof_noise2(p*.754),cof_noise2(1.5743*p.yx+4.5891))-.5;
+}
+
+// Gabor/Voronoi mix 4x4 kernel (clean but slower)
+float water_gavoronoi4(in vec2 p)
+{    
+    vec2 ip = floor(p);
+    vec2 fp = fract(p);
+    vec2 dir = m;// vec2(.9,.7);
+	float f = PI * (0.5 + w_noise);
+    float v = 1.;//cell variability <1.
+    float dv = water_detail;//direction variability <1.
+    float va = 0.0;
+   	float wt = 0.0;
+    for (int i=-2; i<=1; i++) 
+	for (int j=-2; j<=1; j++) 
+	{		
+        vec2 o = vec2(i, j);
+        vec2 h = hash2(ip - o);
+        vec2 pp = fp +o  -v*h;
+        float d = dot(pp, pp);
+        float w = exp(-d*2.);
+        wt +=w;
+      	h= dv*h+dir;//h=normalize(h+dir);
+        va +=cos(dot(pp,h)*f)*w;
+	}    
+    return va/wt;
+}
+
+float water_noise( vec2 p)
+{   
+    return water_gavoronoi4(p);
+}
+
+float water_fbmabs( vec2 p ) {
+	
+	float f=1.;
+   
+	float r = 0.0;	
+    for(int i = 0;i<5;i++){	
+		r += abs(water_noise( p*f ))/f;       
+	    f *=2.2;
+        p+=vec2(-.01,.07)*r+.2*m*time/(.1-f);
+	}
+	return r;
+}
+
+float water_map(vec2 p){
+
+    return 1. - water_fbmabs(p);
+}
+// end water noise
 
 void main()
 {
@@ -876,6 +935,14 @@ void main()
 		else if ( cof_noise_type == 2 )
 			t = cof_fworley3(uv * .01);
 		col.rgb = vec3(t);
+	}
+	
+	else if ( noise_type == 17 )
+	{
+		uv *= -0.3;
+	   	uv += m * time * .1;
+	    float k = water_map(uv)*.8+.25;
+		col.rgb = vec3(clamp(k, 0.0, 1.0));
 	}
 	
 	gl_FragColor = col;

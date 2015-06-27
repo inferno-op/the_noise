@@ -13,6 +13,7 @@ Perlin Noise based on https://www.shadertoy.com/view/MllGzs by guil
 Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
 Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
+Water Noise based on https://www.shadertoy.com/view/llsGWl by guil
 
 License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License." Name="The Noise">
     <Shader OutputBitDepth="Output" Index="1">
@@ -50,6 +51,8 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
 	           <PopupEntry Title="Crawling" Value="15">
 	           </PopupEntry>
 	           <PopupEntry Title="Cells on Fire" Value="16">
+	           </PopupEntry>
+	           <PopupEntry Title="Water" Value="17">
 	           </PopupEntry>
 	    </Uniform>
 
@@ -208,7 +211,16 @@ UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" U
  	UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" UIConditionType="Hide">
   </Uniform>
 	   -->
-  
+
+	   <!-- Water Noise Uniforms -->
+ 	  <Uniform ResDependent="None" Max="100000." Min="-100000.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Detail" Name="water_detail"
+ 	 	UIConditionSource="noise_type" UIConditionValue="17" UIConditionInvert="False" UIConditionType="Hide">
+ 	  </Uniform>
+	  <Uniform ResDependent="None" Max="10." Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="4" Col="0" Page="0" Type="float" DisplayName="Noise" Name="w_noise"
+	 	UIConditionSource="noise_type" UIConditionValue="17" UIConditionInvert="False" UIConditionType="Hide">
+	  </Uniform>
+
+	  	  
 	</Shader>
     <Page Name="General" Page="0">
        <Col Name="Look" Col="0" Page="0">
