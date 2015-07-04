@@ -120,6 +120,7 @@ vec2 fbm(vec2 x)
     for (int i = 0; i < c_noise_itt; i++)
     {
         r += noise(r*a)/a;
+		r += noise((r*a - time*0.5)+a+time);
         a = c_detail;
     }     
     return (r-x)*sqrt(a);
