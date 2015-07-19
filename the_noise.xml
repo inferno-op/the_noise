@@ -14,12 +14,13 @@ Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
 Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
 Water Noise based on https://www.shadertoy.com/view/llsGWl by guil
+Fluid Malone Noise based on // based on https://www.shadertoy.com/view/4s23WK by Antonalog
 
 License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License." Name="The Noise">
     <Shader OutputBitDepth="Output" Index="1">
 
 	  	<!-- Noise Type PopUp -->
-		<Uniform Max="1000000" Min="0" Default="14" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
+		<Uniform Max="1000000" Min="0" Default="17" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
 	           <PopupEntry Title="Concrete" Value="1">
 	           </PopupEntry>
 	           <PopupEntry Title="FBM" Value="2">
@@ -53,6 +54,8 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
 	           <PopupEntry Title="Cells on Fire" Value="16">
 	           </PopupEntry>
 	           <PopupEntry Title="Water" Value="17">
+	           </PopupEntry>
+	           <PopupEntry Title="Fluid Malone" Value="18">
 	           </PopupEntry>
 	    </Uniform>
 
@@ -219,6 +222,18 @@ UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" U
 	  <Uniform ResDependent="None" Max="10." Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" Type="float" DisplayName="Noise" Name="w_noise"
 	 	UIConditionSource="noise_type" UIConditionValue="17" UIConditionInvert="False" UIConditionType="Hide">
 	  </Uniform>
+	  
+   <!-- GP Malone Noise Uniforms -->
+   <Uniform Max="50" Min="1" Default="25" Inc="1" Tooltip="" Row="2" Col="0" Page="0" DisplayName="Detail" Type="int" Name="malone_detail"
+	 	UIConditionSource="noise_type" UIConditionValue="18" UIConditionInvert="False" UIConditionType="Hide">
+	  </Uniform>
+      <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.5" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" DisplayName="Swirl" Type="float" Name="malone_swirl"
+      	UIConditionSource="noise_type" UIConditionValue="18" UIConditionInvert="False" UIConditionType="Hide">
+    </Uniform>
+		
+        <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01" Tooltip="" Row="4" Col="0" Page="0" DisplayName="Size" Type="float" Name="malone_size"
+        	UIConditionSource="noise_type" UIConditionValue="18" UIConditionInvert="False" UIConditionType="Hide">
+  </Uniform>
 
 	  	  
 	</Shader>
