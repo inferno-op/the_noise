@@ -15,6 +15,7 @@ Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
 Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
 Water Noise based on https://www.shadertoy.com/view/llsGWl by guil
 Fluid Malone Noise based on // based on https://www.shadertoy.com/view/4s23WK by Antonalog
+Slabrie Noise based on https://www.shadertoy.com/view/ldBSDd by FatumR
 
 License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License." Name="The Noise">
     <Shader OutputBitDepth="Output" Index="1">
@@ -56,6 +57,8 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
 	           <PopupEntry Title="Water" Value="17">
 	           </PopupEntry>
 	           <PopupEntry Title="Fluid Malone" Value="18">
+	           </PopupEntry>
+	           <PopupEntry Title="Slabrie" Value="19">
 	           </PopupEntry>
 	    </Uniform>
 
@@ -233,6 +236,14 @@ UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" U
 		
         <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01" Tooltip="" Row="4" Col="0" Page="0" DisplayName="Size" Type="float" Name="malone_size"
         	UIConditionSource="noise_type" UIConditionValue="18" UIConditionInvert="False" UIConditionType="Hide">
+  </Uniform>
+  
+  <!-- Slabrie Noise Uniforms -->
+  <Uniform ResDependent="None" Max="10" Min="1" Default="5" Inc="1" Tooltip="" Row="2" Col="0" Page="0" DisplayName="Detail" Type="int" Name="slabrie_detail"
+	   	UIConditionSource="noise_type" UIConditionValue="19" UIConditionInvert="False" UIConditionType="Hide">
+  </Uniform>
+  <Uniform ResDependent="None" Max="10.0" Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" DisplayName="Amplitude" Type="float" Name="slabrie_amp"
+	  UIConditionSource="noise_type" UIConditionValue="19" UIConditionInvert="False" UIConditionType="Hide">
   </Uniform>
 
 	  	  

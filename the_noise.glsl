@@ -102,6 +102,10 @@ uniform float w_noise;
 uniform float malone_size, malone_swirl; 
 uniform int malone_detail;
 
+// Slabrie uniforms
+uniform int slabrie_detail;
+uniform float slabrie_amp;
+
 // start concrete noise
 float hash ( in vec2 p ) 
 {
@@ -859,6 +863,65 @@ vec2 field(vec2 pos)
 }
 // end malone noise
 
+// start slabrie noise
+float slabrie_rand(vec2 co){
+   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+// Rough Value noise implementation
+float slabrie_valueNoiseSimple(vec2 vl) {
+   float minStep = 1.0 ;
+
+   vec2 grid = floor(vl);
+   vec2 gridPnt1 = grid;
+   vec2 gridPnt2 = vec2(grid.x, grid.y + minStep);
+   vec2 gridPnt3 = vec2(grid.x + minStep, grid.y);
+   vec2 gridPnt4 = vec2(gridPnt3.x, gridPnt2.y);
+
+    float s = slabrie_rand(grid);
+    float t = slabrie_rand(gridPnt3);
+    float u = slabrie_rand(gridPnt2);
+    float v = slabrie_rand(gridPnt4);
+    
+    float x1 = smoothstep(0., 1., fract(vl.x));
+    float interpX1 = mix(s, t, x1);
+    float interpX2 = mix(u, v, x1);
+    
+    float y = smoothstep(0., 1., fract(vl.y));
+    float interpY = mix(interpX1, interpX2, y);
+    
+    return interpY;
+}
+
+float slabrie_fractalNoise(vec2 vl) {
+    float persistance = 2.0;
+    float amplitude = 0.58 * slabrie_amp;
+    float rez = 0.0;
+    vec2 p = vl;
+    
+    for (float i = 0; i < slabrie_detail; i++) {
+        rez += amplitude * slabrie_valueNoiseSimple(p);
+        amplitude /= persistance;
+        p *= persistance;
+    }
+    return rez;
+}
+
+float slabrie_complexFBM(vec2 p) {
+    float slow = time;
+    float fast = time;
+    vec2 offset1 = vec2(slow, 0.); // Main front
+    vec2 offset2 = vec2(slabrie_valueNoiseSimple(p + fast) * 2., 0.); // sub fronts
+
+    return slabrie_fractalNoise( p + offset1 + slabrie_fractalNoise(
+        						p + slabrie_fractalNoise(
+                        			p + 2. * slabrie_fractalNoise(p - offset2)
+                                )
+    						)
+    					);
+}
+// end slabrie noise
+
 void main()
 {
 	vec2 uv = (gl_FragCoord.xy / resolution.xy) - pos;
@@ -1095,7 +1158,16 @@ void main()
 		col.rgb = vec3(malone_noise(uv*malone_size));
 		col.rgb = 0.5 + 0.5 * col.rgb;
 		col.rgb = clamp(col.rgb, 0.0, 1.0);
-
+	}
+	
+	else if ( noise_type == 19 )
+	{
+		uv.x += 50.5;
+		uv *= 0.25;
+		float slabrie_rot = 70. * PI / 180.0; 
+		mat2 rotation = mat2( cos(-slabrie_rot), -sin(-slabrie_rot), sin(-slabrie_rot), cos(-slabrie_rot));
+		uv *= rotation;
+		col.rgb = mix(vec3(1.0), vec3(.0), slabrie_complexFBM(uv));
 	}
 	
 	gl_FragColor = col;
