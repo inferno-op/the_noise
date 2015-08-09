@@ -6,7 +6,6 @@ Simplex3D noise based on https://www.shadertoy.com/view/XtBGDG by Lallis
 FBM noise by iq
 Fractal Noise based on https://www.shadertoy.com/view/Msf3Wr by mu6k
 Value Noise based on https://www.shadertoy.com/view/lsf3WH by iq
-Gradient Noise based on https://www.shadertoy.com/view/XdXGW8 by iq
 Worley Noise  based on https://www.shadertoy.com/view/ldB3zc by iq
 Ridged Noise based on https://www.shadertoy.com/view/ldj3Dw by nimitz
 Perlin Noise based on https://www.shadertoy.com/view/MllGzs by guil
@@ -14,14 +13,15 @@ Perlin v2 Noise based on https://www.shadertoy.com/view/MlS3z1 byRenoM
 Crawling Noise based on https://www.shadertoy.com/view/lslXRS by nimitz
 Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
 Water Noise based on https://www.shadertoy.com/view/llsGWl by guil
-Fluid Malone Noise based on // based on https://www.shadertoy.com/view/4s23WK by Antonalog
+Fluid Malone Noise based on https://www.shadertoy.com/view/4s23WK by Antonalog
 Slabrie Noise based on https://www.shadertoy.com/view/ldBSDd by FatumR
+Frederic Noise based on https://www.shadertoy.com/view/4tfXzl by clayjohn
 
 License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License." Name="The Noise">
     <Shader OutputBitDepth="Output" Index="1">
 
 	  	<!-- Noise Type PopUp -->
-		<Uniform Max="1000000" Min="0" Default="17" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
+		<Uniform Max="1000000" Min="0" Default="0" Inc="1" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Noise Type" Type="int" Name="noise_type" ValueType="Popup">
 	           <PopupEntry Title="Concrete" Value="1">
 	           </PopupEntry>
 	           <PopupEntry Title="FBM" Value="2">
@@ -31,10 +31,6 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
 	           <PopupEntry Title="Fractal" Value="4">
 	           </PopupEntry>
 	           <PopupEntry Title="Value" Value="5">
-	           </PopupEntry>
-	           <PopupEntry Title="Gradient v1" Value="6">
-	           </PopupEntry>
-	           <PopupEntry Title="Gradient v2" Value="7">
 	           </PopupEntry>
 	           <PopupEntry Title="Worley" Value="8">
 	           </PopupEntry>
@@ -59,6 +55,8 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
 	           <PopupEntry Title="Fluid Malone" Value="18">
 	           </PopupEntry>
 	           <PopupEntry Title="Slabrie" Value="19">
+	           </PopupEntry>
+	           <PopupEntry Title="Frederic" Value="20">
 	           </PopupEntry>
 	    </Uniform>
 
@@ -106,15 +104,6 @@ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Licen
               </PopupEntry>
               <PopupEntry Title="Fractal" Value="1">
               </PopupEntry>
-       </Uniform>
-	   <!-- Gradient Noise v1 Uniforms -->
-       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="g1_detail"
-   		UIConditionSource="noise_type" UIConditionValue="6" UIConditionInvert="False" UIConditionType="Hide">
-       </Uniform>
-	   
-	   <!-- Gradient Noise v2 Uniforms -->
-       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.001" Tooltip="" Row="2" Col="0" Page="0" Type="float" DisplayName="Detail" Name="g2_detail"
-   		UIConditionSource="noise_type" UIConditionValue="7" UIConditionInvert="False" UIConditionType="Hide">
        </Uniform>
 
 	   <!-- Worley Noise Uniforms -->
@@ -245,6 +234,18 @@ UIConditionSource="noise_type" UIConditionValue="16" UIConditionInvert="False" U
   <Uniform ResDependent="None" Max="10.0" Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" DisplayName="Amplitude" Type="float" Name="slabrie_amp"
 	  UIConditionSource="noise_type" UIConditionValue="19" UIConditionInvert="False" UIConditionType="Hide">
   </Uniform>
+  
+  <!-- Frederic Noise Uniforms -->
+  <Uniform ResDependent="None" Max="24" Min="1" Default="10" Inc="1" Tooltip="" Row="2" Col="0" Page="0" DisplayName="Detail" Type="int" Name="fred_itt"
+	   	UIConditionSource="noise_type" UIConditionValue="20" UIConditionInvert="False" UIConditionType="Hide">
+  </Uniform>
+  <Uniform ResDependent="None" Max="10.0" Min="0.0" Default="3.0" Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" DisplayName="Amplitude" Type="float" Name="fred_detail"
+	  UIConditionSource="noise_type" UIConditionValue="20" UIConditionInvert="False" UIConditionType="Hide">
+  </Uniform>
+  <Uniform ResDependent="None" Max="2.0" Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="4" Col="0" Page="0" DisplayName="Density" Type="float" Name="fred_density"
+	  UIConditionSource="noise_type" UIConditionValue="20" UIConditionInvert="False" UIConditionType="Hide">
+  </Uniform>
+
 
 	  	  
 	</Shader>

@@ -5,7 +5,6 @@
 // FBM noise by iq
 // Fractal Noise based on https://www.shadertoy.com/view/Msf3Wr by mu6k
 // Value Noise based on https://www.shadertoy.com/view/lsf3WH by iq
-// Gradient Noise based on https://www.shadertoy.com/view/XdXGW8 by iq
 // Worley Noise  based on https://www.shadertoy.com/view/ldB3zc by iq
 // Ridged Noise based on https://www.shadertoy.com/view/ldj3Dw by nimitz
 // Perlin Noise based on https://www.shadertoy.com/view/MllGzs by guil
@@ -14,7 +13,8 @@
 // Cells on Fire based on https://www.shadertoy.com/view/lsX3z4 by JoshP
 // Water Noise based on https://www.shadertoy.com/view/llsGWl by guil
 // Fluid Malone Noise based on https://www.shadertoy.com/view/4s23WK by Antonalog
-
+// Slabrie Noise based on https://www.shadertoy.com/view/ldBSDd by FatumR
+// Frederic Noise based on https://www.shadertoy.com/view/4tfXzl by clayjohn
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
 #define PI 3.14159265359
@@ -50,12 +50,6 @@ uniform float f_detail;
 
 // value noise uniforms
 uniform int v_noise_type;
-
-// gradient noise v1 uniforms
-uniform float g1_detail;
-
-// gradient noise v2 uniforms
-uniform float g2_detail;
 
 // worley uniform
 uniform float w_detail;
@@ -105,6 +99,11 @@ uniform int malone_detail;
 // Slabrie uniforms
 uniform int slabrie_detail;
 uniform float slabrie_amp;
+
+// Frédéric uniforms
+uniform float fred_detail;
+uniform int fred_itt;
+uniform float fred_density;
 
 // start concrete noise
 float hash ( in vec2 p ) 
@@ -324,7 +323,6 @@ float fbm5( vec2 p ) {
 }
 // end Perlin Noise
 
-// start Gradient Noise
 vec2 g_hash( vec2 p )
 {
 	p = vec2( dot(p,vec2(127.1,311.7)),
@@ -332,16 +330,6 @@ vec2 g_hash( vec2 p )
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
-float g_noise( in vec2 p )
-{
-    vec2 i = floor( p );
-    vec2 f = fract( p );
-	vec2 u = f*f*(3.0-2.0*f);
-    return mix( mix( dot( g_hash( i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ), 
-                     dot( g_hash( i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
-                mix( dot( g_hash( i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ), 
-                     dot( g_hash( i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
-}
 
 // start Worley Noise
 vec4 worley( in vec2 x, float w )
@@ -922,6 +910,45 @@ float slabrie_complexFBM(vec2 p) {
 }
 // end slabrie noise
 
+// start frederic noise
+float fred_hash( float n )
+{
+    return fract(sin(n)*43758.5453);
+}
+
+float fred_noise( vec2 x )
+{
+    vec2 p = floor(x);
+    vec2 f = fract(x);
+    f = f*f*(3.0-2.0*f);
+    float n = p.x + p.y*57.0 + 113.0*p.y;
+    float res = mix(mix(mix( fred_hash(n+  0.0), fred_hash(n+  1.0),f.x),
+                        mix( fred_hash(n+ 57.0), fred_hash(n+ 58.0),f.x),f.y),
+                    mix(mix( fred_hash(n+113.0), fred_hash(n+114.0),f.x),
+                        mix( fred_hash(n+170.0), fred_hash(n+171.0),f.x),f.y),f.y);
+    return res;
+}
+
+float fred_fbm( vec2 x) {
+    float h = 0.0;
+
+    for (float i=1;i<fred_itt;i++) {
+        h+=fred_noise(x*pow(1.6, i))* 0.9 * fred_density * pow(0.6, i);
+    }
+    return h;
+}
+
+float fred_warp(vec2 p, float mm) 
+{
+    float m = fred_detail;
+    vec2 q = vec2(fred_fbm(vec2(p)), fred_fbm(p+vec2(5.12*time*0.01, 1.08)));
+    vec2 r = vec2(fred_fbm((p+q*m)+vec2(0.1, 4.741)), fred_fbm((p+q*m)+vec2(1.952, 7.845))); 
+    m /= mm;
+    return fred_fbm(p+r*m);
+}
+
+// end frederic noise
+
 void main()
 {
 	vec2 uv = (gl_FragCoord.xy / resolution.xy) - pos;
@@ -994,27 +1021,6 @@ void main()
 		}
 		col.rgb = vec3(f);
 		
-	}
-	
-	else if ( noise_type == 6 )
-	{
-		float f = 0.0;
-		f = g_noise( uv * g1_detail );
-		f = 0.5 + 1.0*f;
-		col.rgb = vec3(f);
-	}
-	
-	else if ( noise_type == 7 )
-	{
-		float f = 0.0;
-		uv *= 2.0;
-        mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
-		f  = 0.5000*g_noise( uv * g2_detail ); uv = m*uv;
-		f += 0.2500*g_noise( uv * g2_detail ); uv = m*uv;
-		f += 0.1250*g_noise( uv * g2_detail ); uv = m*uv;
-		f += 0.0625*g_noise( uv * g2_detail ); uv = m*uv;
-		f = 0.5 + f;
-		col.rgb = vec3(f);
 	}
 	
 	else if ( noise_type == 8 )
@@ -1168,6 +1174,18 @@ void main()
 		mat2 rotation = mat2( cos(-slabrie_rot), -sin(-slabrie_rot), sin(-slabrie_rot), cos(-slabrie_rot));
 		uv *= rotation;
 		col.rgb = mix(vec3(1.0), vec3(.0), slabrie_complexFBM(uv));
+	}
+	
+	else if ( noise_type == 20 )
+	{
+		uv.x += 50.5;
+		float fred_rot = 90. * PI / 180.0; 
+		mat2 rotation = mat2( cos(-fred_rot), -sin(-fred_rot), sin(-fred_rot), cos(-fred_rot));
+		uv *= rotation;
+		vec2 f_uv = uv * resolution.xy * 0.4 ;
+		f_uv += vec2(time* 150., 0.0);
+	    float f_col = fred_warp(f_uv*0.0004, 12.0+fred_fbm(f_uv*0.0005)*16.0);
+		col.rgb = vec3((f_col-0.3)*1.46);
 	}
 	
 	gl_FragColor = col;
